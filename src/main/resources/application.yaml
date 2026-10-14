@@ -1,0 +1,78 @@
+server:
+  port: 8079
+
+spring:
+  application:
+    name: gatewayService
+
+  cloud:
+    gateway:
+      # No Spring Cloud Gateway 5.x (train 2025.1.x) o namespace mudou:
+      # spring.cloud.gateway.routes -> spring.cloud.gateway.server.webflux.routes
+      # O prefixo antigo foi removido (não há alias), então as rotas eram ignoradas em silêncio.
+      server:
+        webflux:
+          routes:
+            # SERVIÇO DE AUTENTICAÇÃO (Liberado)
+            - id: identityService
+              uri: http://localhost:8080
+              predicates:
+                - Path=/api/auth/**
+
+            # SERVIÇO DE STOCKS
+            - id: assetMarketDataServiceStocks
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/stock/**
+              filters:
+                - TokenRelay
+
+            # SERVIÇO DE CRYPTO
+            - id: assetMarketDataServiceCrypto
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/currency/**
+              filters:
+                - TokenRelay
+
+            # SERVIÇO DE PORTFOLIO
+            - id: portfolioService
+              uri: http://localhost:8087
+              predicates:
+                - Path=/api/portfolio/**
+              filters:
+                - TokenRelay
+
+            # SERVIÇO DE ALERTAS
+            - id: portfolioServiceAlerts
+              uri: http://localhost:8087
+              predicates:
+                - Path=/api/alert/**
+              filters:
+                - TokenRelay
+
+            # SERVIÇO DE NOTIFICAÇÃO
+            - id: notificationService
+              uri: http://localhost:8086
+              predicates:
+                - Path=/api/notification/**
+              filters:
+                - TokenRelay
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: gateway-client
+            client-secret: "YolMJpQk6hL5cQbnfM7K3P9REvKsi96fYoK7G50Yc9YBH1DvnrKsDjvZiR1WSzIXgMd0hmop2zYGOWKSoBGkal"
+            authorization-grant-type: authorization_code
+            scope: openid, profile, offline_access
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8081/realms/ChainTracker
+      # Validação de Bearer token recebido direto pelo gateway (Postman, apps).
+      # O header Authorization é repassado intacto para os serviços downstream.
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/ChainTracker
