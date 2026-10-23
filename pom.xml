@@ -17,7 +17,7 @@
 	<description>Gateway Service com Spring Cloud</description>
 
 	<properties>
-		<java.version>25</java.version>
+		<java.version>21</java.version>
 		<!-- Última release train GA. A 2026.0.0 não existe (só há 2026.0.0-M1, milestone)
 		     e a 2025.1.x aceita Spring Boot 4.0.x e 4.1.x. -->
 		<spring-cloud.version>2025.1.3</spring-cloud.version>
