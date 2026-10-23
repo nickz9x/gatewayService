@@ -1,3 +1,7 @@
+FROM amazoncorretto:21 AS build
+
+RUN yum install -y tar gzip
+
 WORKDIR /app
 
 COPY mvnw pom.xml ./
