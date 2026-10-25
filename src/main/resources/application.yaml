@@ -7,55 +7,72 @@ spring:
 
   cloud:
     gateway:
-      # No Spring Cloud Gateway 5.x (train 2025.1.x) o namespace mudou:
-      # spring.cloud.gateway.routes -> spring.cloud.gateway.server.webflux.routes
-      # O prefixo antigo foi removido (não há alias), então as rotas eram ignoradas em silêncio.
       server:
         webflux:
           routes:
-            # SERVIÇO DE AUTENTICAÇÃO (Liberado)
             - id: identityService
-              uri: http://identity-service:3002
+              uri: http://identity-service:8080
               predicates:
                 - Path=/api/auth/**
 
-            # SERVIÇO DE STOCKS
             - id: assetMarketDataServiceStocks
-              uri: http://assetmarketdata-service:3003
+              uri: http://assetmarketdata-service:8082
               predicates:
                 - Path=/api/stock/**
               filters:
                 - TokenRelay
 
-            # SERVIÇO DE CRYPTO
+
             - id: assetMarketDataServiceCrypto
-              uri: http://assetmarketdata-service:3003
+              uri: http://assetmarketdata-service:8082
               predicates:
                 - Path=/api/currency/**
               filters:
                 - TokenRelay
 
-            # SERVIÇO DE PORTFOLIO
+
             - id: portfolioService
-              uri: http://portfolio-service:3004
+              uri: http://portfolio-service:8087
               predicates:
                 - Path=/api/portfolio/**
               filters:
                 - TokenRelay
 
-            # SERVIÇO DE ALERTAS
+
             - id: portfolioServiceAlerts
-              uri: http://portfolio-service:3004
+              uri: http://portfolio-service:8087
               predicates:
                 - Path=/api/alert/**
               filters:
                 - TokenRelay
 
-            # SERVIÇO DE NOTIFICAÇÃO
+
             - id: notificationService
-              uri: http://notification-service:3005
+              uri: http://notification-service:8086
               predicates:
                 - Path=/api/notification/**
+              filters:
+                - TokenRelay
+
+
+            - id: identityServiceBot
+              uri: http://identity-service:8080
+              predicates:
+                - Path=/api/bot/auth/**
+              filters:
+                - TokenRelay
+
+            - id: portfolioServiceBotAlert
+              uri: http://portfolio-service:8087
+              predicates:
+                - Path=/api/bot/alert/**
+              filters:
+                - TokenRelay
+
+            - id: portfolioServiceBotPortfolio
+              uri: http://portfolio-service:8087
+              predicates:
+                - Path=/api/bot/portfolio/**
               filters:
                 - TokenRelay
 
@@ -71,8 +88,6 @@ spring:
         provider:
           keycloak:
             issuer-uri: http://keycloak:8080/realms/ChainTracker
-      # Validação de Bearer token recebido direto pelo gateway (Postman, apps).
-      # O header Authorization é repassado intacto para os serviços downstream.
       resourceserver:
         jwt:
           issuer-uri: http://keycloak:8080/realms/ChainTracker
