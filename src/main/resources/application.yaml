@@ -76,6 +76,27 @@ spring:
               filters:
                 - TokenRelay
 
+            - id: openApiAssetMarketData
+              uri: http://assetmarketdata-service:8082
+              predicates:
+                - Path=/docs/asset/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: openApiIdentity
+              uri: http://identity-service:8080
+              predicates:
+                - Path=/docs/identity/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: openApiPortfolio
+              uri: http://portfolio-service:8087
+              predicates:
+                - Path=/docs/portfolio/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
   security:
     oauth2:
       client:
@@ -91,3 +112,19 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://keycloak:8080/realms/ChainTracker
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    operations-sorter: method
+    tags-sorter: alpha
+    urls:
+      - name: assetMarketDataService
+        url: /docs/asset/v3/api-docs
+      - name: identity-service
+        url: /docs/identity/v3/api-docs
+      - name: portfolioService
+        url: /docs/portfolio/v3/api-docs
